@@ -25,7 +25,7 @@ class PomodoroRepositoryTest {
     public void testCreatePomodoro() {
         // Criando um novo objeto Pomodoro para teste
         Pomodoro pomodoro = new Pomodoro();
-        pomodoro.setDuracao(LocalTime.of(0, 25));
+        //pomodoro.setDuracao(LocalTime.of(0, 25));
         pomodoro.setCategoria("Trabalho");
         pomodoro.setDataInicio(LocalDate.now());
         pomodoro.setDataFinal(LocalDate.now().plusDays(1));

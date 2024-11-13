@@ -19,8 +19,10 @@ public class Pomodoro {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "author_id_seq")
     private Long id;
 
-    private LocalTime duracao;
-
+    private LocalTime duracaoSprint;
+    private int SprintsPorPomodoro;
+    private LocalTime duracaoPausaCurta;
+    private LocalTime duracaoPausaLonga;
     private String categoria;
     private LocalDate dataInicio;
     private LocalDate dataFinal;

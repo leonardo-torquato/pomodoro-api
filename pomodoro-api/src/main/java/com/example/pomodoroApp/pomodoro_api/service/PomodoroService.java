@@ -34,7 +34,10 @@ public class PomodoroService {
     public Pomodoro updatePomodoro(Long id, Pomodoro updatedPomodoro) {
         return pomodoroRepository.findById(id)
                 .map(pomodoro -> {
-                    pomodoro.setDuracao(updatedPomodoro.getDuracao());
+                    pomodoro.setSprintsPorPomodoro(updatedPomodoro.getSprintsPorPomodoro());
+                    pomodoro.setDuracaoSprint(updatedPomodoro.getDuracaoSprint());
+                    pomodoro.setDuracaoPausaCurta(updatedPomodoro.getDuracaoPausaCurta());
+                    pomodoro.setDuracaoPausaCurta(updatedPomodoro.getDuracaoPausaLonga());
                     pomodoro.setCategoria(updatedPomodoro.getCategoria());
                     pomodoro.setDataInicio(updatedPomodoro.getDataInicio());
                     pomodoro.setDataFinal(updatedPomodoro.getDataFinal());
