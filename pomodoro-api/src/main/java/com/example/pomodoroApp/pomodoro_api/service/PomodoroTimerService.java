@@ -1,6 +1,7 @@
 package com.example.pomodoroApp.pomodoro_api.service;
 
 import com.example.pomodoroApp.pomodoro_api.model.Pomodoro;
+import lombok.Setter;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -8,6 +9,7 @@ import java.time.LocalTime;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 @Service
 public class PomodoroTimerService {
@@ -15,30 +17,45 @@ public class PomodoroTimerService {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private volatile boolean isRunning;
     private volatile boolean isPaused;
-    private int completedSprints = 0;
+
+    @Setter
+    private Consumer<Void> completionListener;
 
     public void startPomodoro(Pomodoro pomodoro) {
         isRunning = true;
         isPaused = false;
-        completedSprints = 0;
         executor.submit(() -> runPomodoroCycle(pomodoro));
     }
+//    private void runPomodoroCycle(Pomodoro pomodoro) {
+//        try {
+//            completedSprints = 0;
+//            while (isRunning && completedSprints < pomodoro.getSprintsPorPomodoro()) {
+//                runSprint(pomodoro.getDuracaoSprint());
+//                completedSprints++;
+//
+//                runPause(pomodoro.getDuracaoPausaCurta(), "Pausa curta");
+//            }
+//            runPause(pomodoro.getDuracaoPausaLonga(), "Pausa longa");
+//            endPomodoroCycle(pomodoro);
+//        } catch (InterruptedException e) {
+//            Thread.currentThread().interrupt();
+//        }
+//    }
 
     private void runPomodoroCycle(Pomodoro pomodoro) {
         try {
+            int completedSprints = 0;
             while (isRunning && completedSprints < pomodoro.getSprintsPorPomodoro()) {
                 runSprint(pomodoro.getDuracaoSprint());
-
                 completedSprints++;
-                if (completedSprints < pomodoro.getSprintsPorPomodoro()) {
-                    if (completedSprints % pomodoro.getSprintsPorPomodoro() == 0) {
-                        runPause(pomodoro.getDuracaoPausaLonga(), "Pausa longa");
-                    } else {
-                        runPause(pomodoro.getDuracaoPausaCurta(), "Pausa curta");
-                    }
-                }
+                runPause(pomodoro.getDuracaoPausaCurta(), "Pausa curta");
             }
+            runPause(pomodoro.getDuracaoPausaLonga(), "Pausa longa");
             endPomodoroCycle(pomodoro);
+            if (completionListener != null) {
+                // Chama o callback para permitir testes que dependem de temporização
+                completionListener.accept(null);
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -78,10 +95,7 @@ public class PomodoroTimerService {
         System.out.println("Pomodoro finalizado.");
     }
 
-    public void stopPomodoro() {
-        isRunning = false;
-        executor.shutdownNow();
-    }
+
 
     public void pausePomodoro() {
         if (isRunning) {
