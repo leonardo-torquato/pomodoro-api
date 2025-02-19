@@ -1,0 +1,25 @@
+# Ignore diretórios de build
+/target/
+/out/
+
+# Ignore arquivos de configurações IDEs
+*.iml
+*.idea/
+*.vscode/
+
+# Ignore arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignore configurações do Maven e log do Byte Buddy
+.mvn/
+!/.mvn/wrapper/maven-wrapper.jar
+log/
+
+# Ignore arquivos de ambiente
+*.env
+*.log
+
+# Ignore arquivos de credenciais
+application.properties
+application.yml
