@@ -1,7 +1,5 @@
 package com.example.pomodoroApp.pomodoro_api.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,48 +9,32 @@ import com.example.pomodoroApp.pomodoro_api.service.PomodoroService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/pomodoros")
+@RequestMapping("/api/pomodoro")
 public class PomodoroController {
 
     private final PomodoroService pomodoroService;
 
-    @Autowired
     public PomodoroController(PomodoroService pomodoroService) {
         this.pomodoroService = pomodoroService;
     }
 
-    @GetMapping
-    public List<Pomodoro> getAllPomodoros() {
-        return pomodoroService.getAllPomodoros();
+    @PostMapping("/start")
+    public ResponseEntity<String> startPomodoro(@RequestBody Pomodoro pomodoro) {
+        pomodoroService.save(pomodoro);
+        return ResponseEntity.ok("Pomodoro iniciado!");
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Pomodoro> getPomodoroById(@PathVariable Long id) {
-        return pomodoroService.getPomodoroById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @PostMapping("/update")
+    public ResponseEntity<String> updatePomodoro(@RequestBody Pomodoro pomodoro) {
+        pomodoroService.update(pomodoro);
+        return ResponseEntity.ok("Pomodoro atualizado!");
     }
 
-    @PostMapping
-    public Pomodoro createPomodoro(@RequestBody Pomodoro pomodoro) {
-        return pomodoroService.createPomodoro(pomodoro);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Pomodoro> updatePomodoro(@PathVariable Long id, @RequestBody Pomodoro pomodoro) {
-        try {
-            return ResponseEntity.ok(pomodoroService.updatePomodoro(id, pomodoro));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePomodoro(@PathVariable Long id) {
-        pomodoroService.deletePomodoro(id);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/complete")
+    public ResponseEntity<String> completePomodoro(@RequestBody Pomodoro pomodoro) {
+        pomodoroService.complete(pomodoro);
+        return ResponseEntity.ok("Pomodoro finalizado!");
     }
 }
+

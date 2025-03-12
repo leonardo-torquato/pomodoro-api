@@ -1,10 +1,10 @@
-import logo from './logo.svg';
-import PomodoroList from './PomodoroList';
+import PomodoroTimer from './PomodoroTimer'; 
+
 import './App.css';
 
 function App() {
   return (
-    <PomodoroList/>
+    <PomodoroTimer/>
   );
 }
 
