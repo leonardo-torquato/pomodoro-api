@@ -16,7 +16,7 @@ import java.time.LocalTime;
 public class Pomodoro {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "author_id_seq")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private LocalTime duracaoSprint;
@@ -24,8 +24,15 @@ public class Pomodoro {
     private LocalTime duracaoPausaCurta;
     private LocalTime duracaoPausaLonga;
     private String categoria;
+
     private LocalDate dataInicio;
     private LocalDate dataFinal;
+
     private boolean status;
+    private Long usuarioId; // Associa um usuário ao pomodoro (null se for anônimo)
+
+    public boolean isFinalizado() {
+        return dataFinal != null;
+    }
 }
 

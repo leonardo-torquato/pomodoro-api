@@ -1,10 +1,9 @@
 package com.example.pomodoroApp.pomodoro_api.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.example.pomodoroApp.pomodoro_api.model.Pomodoro;
 import com.example.pomodoroApp.pomodoro_api.service.PomodoroService;
+
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,16 +24,23 @@ public class PomodoroController {
         return ResponseEntity.ok("Pomodoro iniciado!");
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<String> updatePomodoro(@RequestBody Pomodoro pomodoro) {
-        pomodoroService.update(pomodoro);
-        return ResponseEntity.ok("Pomodoro atualizado!");
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Pomodoro> updatePomodoro(@PathVariable Long id, @RequestBody Pomodoro pomodoro) {
+        return pomodoroService.update(id, pomodoro)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/complete")
-    public ResponseEntity<String> completePomodoro(@RequestBody Pomodoro pomodoro) {
-        pomodoroService.complete(pomodoro);
+    @PostMapping("/complete/{id}")
+    public ResponseEntity<String> completePomodoro(@PathVariable Long id) {
+        pomodoroService.complete(id);
         return ResponseEntity.ok("Pomodoro finalizado!");
+    }
+
+    @GetMapping("/completed/{userId}")
+    public ResponseEntity<List<Pomodoro>> getCompletedPomodoros(@PathVariable Long userId) {
+        List<Pomodoro> completedPomodoros = pomodoroService.getCompletedPomodoros(userId);
+        return ResponseEntity.ok(completedPomodoros);
     }
 }
 
