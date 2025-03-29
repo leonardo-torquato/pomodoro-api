@@ -2,25 +2,35 @@ package com.example.pomodoroApp.pomodoro_api.service;
 
 import com.example.pomodoroApp.pomodoro_api.model.Pomodoro;
 import com.example.pomodoroApp.pomodoro_api.repository.PomodoroRepository;
+import com.example.pomodoroApp.pomodoro_api.repository.UserRepository;
+
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@AllArgsConstructor
 public class PomodoroService {
 
     private final PomodoroRepository pomodoroRepository;
-
-    public PomodoroService(PomodoroRepository pomodoroRepository) {
-        this.pomodoroRepository = pomodoroRepository;
-    }
+    private final UserRepository userRepository;
 
     public Pomodoro save(Pomodoro pomodoro) {
-        pomodoro.setStatus(true); // Define como ativo ao iniciar
+
+        if (pomodoro.getUsuarioId() != null && !userRepository.existsById(pomodoro.getUsuarioId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário não encontrado!");     
+        }
+        
+        pomodoro.setDataInicio(LocalDate.now()); // Define a data de início
+        pomodoro.setStatus(true);
+        
         return pomodoroRepository.save(pomodoro);
     }
 

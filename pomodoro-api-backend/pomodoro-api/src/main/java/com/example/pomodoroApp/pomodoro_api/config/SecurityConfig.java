@@ -1,4 +1,5 @@
 package com.example.pomodoroApp.pomodoro_api.config;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,7 +29,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers("/api/auth/login", 
+                                             "/api/auth/register", 
+                                             "/api/pomodoro/start").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form.defaultSuccessUrl("/api/pomodoro", true))

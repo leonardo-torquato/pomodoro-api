@@ -20,12 +20,12 @@ public class Pomodoro {
     private Long id;
 
     private LocalTime duracaoSprint;
-    private int SprintsPorPomodoro;
+    private int sprintsPorPomodoro;
     private LocalTime duracaoPausaCurta;
     private LocalTime duracaoPausaLonga;
     private String categoria;
 
-    private LocalDate dataInicio;
+    private LocalDate dataInicio = LocalDate.now();;
     private LocalDate dataFinal;
 
     private boolean status;
