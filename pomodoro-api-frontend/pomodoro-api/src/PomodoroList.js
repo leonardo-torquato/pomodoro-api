@@ -1,26 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const PomodoroList = () => {
+const PomodoroList = ({ currentUser }) => {
     const [pomodoros, setPomodoros] = useState([]);
 
     useEffect(() => {
-        axios.get('/api/pomodoros')
-            .then(response => {
-                setPomodoros(response.data);
-            })
-            .catch(error => {
-                console.error('Erro ao buscar Pomodoros:', error);
-            });
-    }, []);
+        if (currentUser) {
+            axios.get(`/api/pomodoro/completed/${currentUser.id}`, { withCredentials: true })
+                .then(response => {
+                    setPomodoros(response.data);
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar Pomodoros:', error);
+                });
+        }
+    }, [currentUser]);
 
     return (
-        <div>
-            <h1>Lista de Pomodoros</h1>
+        <div className="pomodoro-list">
+            <h2>Meus Pomodoros Concluídos</h2>
             <ul>
                 {pomodoros.map(pomodoro => (
                     <li key={pomodoro.id}>
-                        {pomodoro.categoria} - {pomodoro.duracaoSprint}
+                        <strong>{pomodoro.categoria || 'Sem categoria'}</strong> - 
+                        {new Date(pomodoro.dataInicio).toLocaleDateString()} - 
+                        {pomodoro.sprintsPorPomodoro} sprints
                     </li>
                 ))}
             </ul>

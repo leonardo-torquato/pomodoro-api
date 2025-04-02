@@ -29,12 +29,15 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", 
-                                             "/api/auth/register", 
-                                             "/api/pomodoro/start").permitAll()
+                .requestMatchers("/api/auth/**", "/api/pomodoro/start").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form.defaultSuccessUrl("/api/pomodoro", true))
+            .logout(logout -> logout
+                .logoutUrl("/api/auth/logout")
+                .logoutSuccessUrl("/api/auth/login?logout")
+                .permitAll()
+            )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )

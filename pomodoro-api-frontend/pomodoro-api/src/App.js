@@ -1,10 +1,18 @@
-import PomodoroTimer from './PomodoroTimer'; 
-
+import React, { useState } from 'react';
+import PomodoroTimer from './PomodoroTimer';
+import PomodoroList from './PomodoroList';
+import AuthSection from './AuthSection.js';
 import './App.css';
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(null);
+
   return (
-    <PomodoroTimer/>
+    <div className="app-container">
+      <AuthSection currentUser={currentUser} setCurrentUser={setCurrentUser} />
+      <PomodoroTimer currentUser={currentUser} />
+      {currentUser && <PomodoroList currentUser={currentUser} />}
+    </div>
   );
 }
 
