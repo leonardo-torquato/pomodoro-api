@@ -1,28 +1,24 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './AuthSection.css';
 
 const AuthSection = ({ currentUser, setCurrentUser }) => {
   const [formData, setFormData] = useState({ username: '', password: '' });
+  const [isLoginView, setIsLoginView] = useState(true);
 
-  const handleRegister = async (e) => {
+  const handleAuth = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/auth/register', formData);
-      alert('Registro realizado com sucesso!');
+      if (isLoginView) {
+        await axios.post('/api/auth/login', formData, { withCredentials: true });
+        setCurrentUser({ username: formData.username });
+      } else {
+        await axios.post('/api/auth/register', formData);
+        alert('Registro realizado! Faça login.');
+        setIsLoginView(true);
+      }
     } catch (error) {
-      alert(error.response?.data || 'Erro no registro');
-    }
-  };
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post('/api/auth/login', formData, { withCredentials: true });
-      const user = { id: 1, username: formData.username }; // Em produção, obtenha do backend
-      setCurrentUser(user);
-      alert('Login realizado!');
-    } catch (error) {
-      alert('Credenciais inválidas');
+      alert(isLoginView ? 'Credenciais inválidas' : 'Erro no registro');
     }
   };
 
@@ -37,28 +33,44 @@ const AuthSection = ({ currentUser, setCurrentUser }) => {
   };
 
   return (
-    <div className="auth-section">
+    <div className="auth-container">
       {!currentUser ? (
-        <form>
-          <input
-            type="text"
-            placeholder="Usuário"
-            value={formData.username}
-            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-          />
-          <input
-            type="password"
-            placeholder="Senha"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          />
-          <button onClick={handleRegister}>Registrar</button>
-          <button onClick={handleLogin}>Login</button>
-        </form>
+        <div className="auth-card">
+          <h2>{isLoginView ? 'Login' : 'Registrar'}</h2>
+          <form onSubmit={handleAuth}>
+            <input
+              type="text"
+              placeholder="Usuário"
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              className="auth-input"
+              required
+            />
+            <input
+              type="password"
+              placeholder="Senha"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="auth-input"
+              required
+            />
+            <button type="submit" className="auth-button">
+              {isLoginView ? 'Entrar' : 'Registrar'}
+            </button>
+          </form>
+          <button 
+            onClick={() => setIsLoginView(!isLoginView)} 
+            className="auth-toggle"
+          >
+            {isLoginView ? 'Criar nova conta' : 'Já tenho uma conta'}
+          </button>
+        </div>
       ) : (
-        <div>
-          <p>Bem-vindo, {currentUser.username}!</p>
-          <button onClick={handleLogout}>Logout</button>
+        <div className="welcome-message">
+          <p>Olá, <span>{currentUser.username}</span>!</p>
+          <button onClick={handleLogout} className="auth-button logout">
+            Sair
+          </button>
         </div>
       )}
     </div>
