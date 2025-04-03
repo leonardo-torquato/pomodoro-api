@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import PomodoroTimer from './PomodoroTimer';
-import PomodoroList from './PomodoroList';
-import AuthSection from './Auth/AuthSection.js';
-import './App.css';
+import PomodoroTimer from './components/Pomodoro/PomodoroTimer';
+import PomodoroList from './components/Pomodoro/PomodoroList';
+import AuthSection from './components/Auth/AuthSection.js';
+import './styles/App.css';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
