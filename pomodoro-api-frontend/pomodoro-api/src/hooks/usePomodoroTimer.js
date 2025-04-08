@@ -1,38 +1,43 @@
 import { useState, useEffect, useRef } from "react";
 
-const usePomodoroTimer = (initialTime, autoStart = false, onComplete) => {
-  const [timeLeft, setTimeLeft] = useState(initialTime);
-  const [isRunning, setIsRunning] = useState(autoStart);
+const usePomodoroTimer = (duration, onComplete) => {
+  const [timeLeft, setTimeLeft] = useState(duration);
+  const [isRunning, setIsRunning] = useState(false);
   const timerRef = useRef(null);
+
+  // Resetar o timer quando a duração mudar
+  useEffect(() => {
+    setTimeLeft(duration);
+  }, [duration]);
 
   useEffect(() => {
     if (isRunning) {
       timerRef.current = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
             clearInterval(timerRef.current);
             setIsRunning(false);
-            if (onComplete) onComplete(); // Chama a função ao terminar
+            onComplete?.();
             return 0;
           }
-          return prevTime - 1;
+          return prev - 1;
         });
       }, 1000);
-    } else {
-      clearInterval(timerRef.current);
     }
 
     return () => clearInterval(timerRef.current);
   }, [isRunning, onComplete]);
 
-  const start = () => setIsRunning(true);
-  const pause = () => setIsRunning(false);
-  const reset = (newTime) => {
-    setIsRunning(false);
-    setTimeLeft(newTime);
+  return {
+    timeLeft,
+    isRunning,
+    start: () => setIsRunning(true),
+    pause: () => setIsRunning(false),
+    reset: (newDuration) => {
+      setIsRunning(false);
+      setTimeLeft(newDuration);
+    }
   };
-
-  return { timeLeft, isRunning, start, pause, reset };
 };
 
-export default usePomodoroTimer;
+export default usePomodoroTimer;  

@@ -23,40 +23,45 @@ public class PomodoroService {
     private final UserRepository userRepository;
 
     public Pomodoro save(Pomodoro pomodoro) {
-
+        // Validação do usuário
         if (pomodoro.getUsuarioId() != null && !userRepository.existsById(pomodoro.getUsuarioId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário não encontrado!");     
         }
         
-        pomodoro.setDataInicio(LocalDate.now()); // Define a data de início
-        pomodoro.setStatus(true);
+        // Define a data de início (não usa mais 'status')
+        pomodoro.setStartDate(LocalDate.now());
         
         return pomodoroRepository.save(pomodoro);
     }
 
     public Optional<Pomodoro> update(Long id, Pomodoro novoPomodoro) {
         return pomodoroRepository.findById(id).map(pomodoroExistente -> {
-            pomodoroExistente.setDuracaoSprint(novoPomodoro.getDuracaoSprint());
-            pomodoroExistente.setSprintsPorPomodoro(novoPomodoro.getSprintsPorPomodoro());
-            pomodoroExistente.setDuracaoPausaCurta(novoPomodoro.getDuracaoPausaCurta());
-            pomodoroExistente.setDuracaoPausaLonga(novoPomodoro.getDuracaoPausaLonga());
-            pomodoroExistente.setCategoria(novoPomodoro.getCategoria());
+            // Atualiza apenas campos editáveis
+            pomodoroExistente.setSprintDurationSec(novoPomodoro.getSprintDurationSec());
+            pomodoroExistente.setShortBreakDurationSec(novoPomodoro.getShortBreakDurationSec());
+            pomodoroExistente.setLongBreakDurationSec(novoPomodoro.getLongBreakDurationSec());
+            pomodoroExistente.setSprintsPerCycle(novoPomodoro.getSprintsPerCycle());
+            pomodoroExistente.setCategory(novoPomodoro.getCategory());
+            
             return pomodoroRepository.save(pomodoroExistente);
         });
     }
 
     public void complete(Long id) {
         pomodoroRepository.findById(id).ifPresent(pomodoro -> {
-            pomodoro.setStatus(false);
-            pomodoro.setDataFinal(LocalDate.now()); // Marca o tempo de finalização
+            pomodoro.setFinalDate(LocalDate.now()); // Marca a data de finalização
             pomodoroRepository.save(pomodoro);
         });
     }
 
-    public List<Pomodoro> getCompletedPomodoros(Long usuarioId) {
-        return pomodoroRepository.findByUsuarioId(usuarioId).stream()
-                .filter(Pomodoro::isFinalizado)
+    public List<Pomodoro> getCompletedPomodoros(Long userId) {
+        return pomodoroRepository.findByUsuarioId(userId).stream()
+                .filter(p -> p.getFinalDate() != null) // Substitui 'isFinalizado' por checagem direta
                 .collect(Collectors.toList());
+    }
+
+    public List<Pomodoro> getAllCompleted(Long userId) {
+        return pomodoroRepository.findByFinalDateIsNotNull(userId);
     }
 }
 

@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
@@ -19,20 +17,15 @@ public class Pomodoro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalTime duracaoSprint;
-    private int sprintsPorPomodoro;
-    private LocalTime duracaoPausaCurta;
-    private LocalTime duracaoPausaLonga;
-    private String categoria;
+    // Durações em segundos (exemplo: 25 minutos = 1500 segundos)
+    private int sprintDurationSec; 
+    private int shortBreakDurationSec;
+    private int longBreakDurationSec;
+    private int sprintsPerCycle; // Quantidade de sprints por ciclo
 
-    private LocalDate dataInicio = LocalDate.now();;
-    private LocalDate dataFinal;
+    private LocalDate startDate;
+    private LocalDate finalDate; // Preenchido apenas ao finalizar
 
-    private boolean status;
-    private Long usuarioId; // Associa um usuário ao pomodoro (null se for anônimo)
-
-    public boolean isFinalizado() {
-        return dataFinal != null;
-    }
+    private String category;
+    private Long usuarioId; // Null se for anônimo
 }
-
