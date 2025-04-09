@@ -50,7 +50,7 @@ public class PomodoroController {
         List<Pomodoro> completedPomodoros = 
             (userId != null) 
                 ? pomodoroService.getCompletedPomodoros(userId) 
-                : pomodoroService.getAllCompleted(userId);
+                : pomodoroService.getAllCompleted();
         return ResponseEntity.ok(completedPomodoros);
     }
 }

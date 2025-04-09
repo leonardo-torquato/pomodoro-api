@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface PomodoroRepository extends JpaRepository<Pomodoro, Long> {
     List<Pomodoro> findByUsuarioId(Long userId);
 
-    List<Pomodoro> findByFinalDateIsNotNull(Long userId);
+    List<Pomodoro> findByFinalDateIsNotNull();
 
 }

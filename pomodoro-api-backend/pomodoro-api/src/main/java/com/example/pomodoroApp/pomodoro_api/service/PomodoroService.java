@@ -60,8 +60,8 @@ public class PomodoroService {
                 .collect(Collectors.toList());
     }
 
-    public List<Pomodoro> getAllCompleted(Long userId) {
-        return pomodoroRepository.findByFinalDateIsNotNull(userId);
+    public List<Pomodoro> getAllCompleted() {
+        return pomodoroRepository.findByFinalDateIsNotNull();
     }
 }
 
