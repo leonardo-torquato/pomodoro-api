@@ -4,17 +4,21 @@ const usePomodoroTimer = (duration, onComplete) => {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isRunning, setIsRunning] = useState(false);
   const timerRef = useRef(null);
+  const hasCompleted = useRef(false); //ref para controlar a flag de estado de conclusão
+
 
   // Resetar o timer quando a duração mudar
   useEffect(() => {
     setTimeLeft(duration);
+    hasCompleted.current = false;
   }, [duration]);
 
   useEffect(() => {
     if (isRunning) {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
-          if (prev <= 1) {
+          if (prev <= 1 && !hasCompleted.current) {
+            hasCompleted.current = true;
             clearInterval(timerRef.current);
             setIsRunning(false);
             onComplete?.();
@@ -25,7 +29,10 @@ const usePomodoroTimer = (duration, onComplete) => {
       }, 1000);
     }
 
-    return () => clearInterval(timerRef.current);
+    return () => {
+      clearInterval(timerRef.current);
+      hasCompleted.current = false;
+    }
   }, [isRunning, onComplete]);
 
   return {

@@ -41,31 +41,41 @@ const PomodoroTimer = ({ currentUser }) => {
     handleCycleComplete
   );
 
-  function handleCycleComplete() {
-
-    switch(phase) {
-    
-      case 'sprint':
-        if(sprintCount < settings.sprintsPerCycle - 1) {
-          setPhase('short_break'); // Só muda a fase, sem incrementar    
-        } else {
-          setPhase('long_break');
-        }
-      break;
-    
-      case 'short_break':
-        setPhase('sprint');   
-        setSprintCount(prev => prev + 1); // Incrementa ao iniciar novo sprint
-      break;
-    
-      case 'long_break':
-        completePomodoro();
-        setPhase('idle');
-        setSprintCount(0);
-      break;
+  // Efeito para reiniciar e iniciar o timer quando a fase mudar
+  useEffect(() => {
+    if (phase !== 'idle' && timeLeft !== getPhaseDuration()) {
+      reset(getPhaseDuration());
+      start(); // Inicia automaticamente o novo timer
     }
-    
+  }, [phase]); // Executa sempre que a fase muda
+
+function handleCycleComplete() {
+
+  switch(phase) {
+    case 'sprint':
+      if(sprintCount < settings.sprintsPerCycle - 1) {
+        setPhase('short_break');
+      } else {
+        setPhase('long_break');
+      }
+      break;
+
+    case 'short_break':
+      setSprintCount(prev => {
+        const newCount = prev + 1;
+        return newCount;
+      });
+      setPhase('sprint');   
+      break;
+
+    case 'long_break':
+      completePomodoro();
+      setPhase('idle');
+      setSprintCount(0);
+      break;
   }
+
+} 
 
   const createPomodoro = async () => {
     try {

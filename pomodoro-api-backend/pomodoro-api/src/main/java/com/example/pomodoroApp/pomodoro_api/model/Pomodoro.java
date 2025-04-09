@@ -21,8 +21,9 @@ public class Pomodoro {
     private int sprintDurationSec; 
     private int shortBreakDurationSec;
     private int longBreakDurationSec;
-    private int sprintsPerCycle; // Quantidade de sprints por ciclo
-
+    
+    private int sprintsPerCycle; 
+    
     private LocalDate startDate;
     private LocalDate finalDate; // Preenchido apenas ao finalizar
 
