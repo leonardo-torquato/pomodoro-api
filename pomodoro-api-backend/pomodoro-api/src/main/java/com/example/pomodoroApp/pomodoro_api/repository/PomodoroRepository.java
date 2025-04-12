@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PomodoroRepository extends JpaRepository<Pomodoro, Long> {
+    
     List<Pomodoro> findByUsuarioId(Long userId);
 
     List<Pomodoro> findByFinalDateIsNotNull();

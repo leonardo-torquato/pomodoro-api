@@ -29,7 +29,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/api/pomodoro/start").permitAll()
+                .requestMatchers("/api/auth/**", "/api/pomodoro/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form.defaultSuccessUrl("/api/pomodoro", true))
