@@ -11,7 +11,6 @@ function App() {
     <div className="app-container">
       <AuthSection currentUser={currentUser} setCurrentUser={setCurrentUser} />
       <PomodoroTimer currentUser={currentUser} />
-      {currentUser && <PomodoroList currentUser={currentUser} />}
     </div>
   );
 }

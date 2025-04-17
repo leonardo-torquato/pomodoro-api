@@ -11,7 +11,8 @@ const PHASES = {
 };
 
 const PomodoroTimer = ({ currentUser }) => {
-  // Configurações do Pomodoro
+
+  // valores padrão do Pomodoro para place holder na aplicação.
   const [settings, setSettings] = useState({
     sprint: 25,
     shortBreak: 5,
