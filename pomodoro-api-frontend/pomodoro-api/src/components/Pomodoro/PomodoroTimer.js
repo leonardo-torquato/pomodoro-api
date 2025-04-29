@@ -14,9 +14,9 @@ const PomodoroTimer = ({ currentUser }) => {
 
   // valores padrão do Pomodoro para place holder na aplicação.
   const [settings, setSettings] = useState({
-    sprint: 25,
-    shortBreak: 5,
-    longBreak: 15,
+    sprint: 25 * 60, // Convertendo minutos para segundos
+    shortBreak: 5 * 60, // Convertendo minutos para segundos
+    longBreak: 15 * 60, // Convertendo minutos para segundos
     sprintsPerCycle: 3
   });
 
@@ -25,6 +25,9 @@ const PomodoroTimer = ({ currentUser }) => {
   const [sprintCount, setSprintCount] = useState(0);
   const [category, setCategory] = useState('');
   const [pomodoroId, setPomodoroId] = useState(null);
+  const [activeTab, setActiveTab] = useState('sprint');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState('');
 
   // Calcula a duração atual baseada na fase
   const getPhaseDuration = () => {
@@ -116,17 +119,88 @@ function handleCycleComplete() {
     reset(settings.sprint);
   };
 
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  const handleTimerClick = () => {
+    if (phase === 'idle') {
+      setIsEditing(true);
+      setEditValue(settings[activeTab] / 60);
+    }
+  };
+
+  const handleEditChange = (e) => {
+    const value = Math.max(1, Math.min(60, Number(e.target.value)));
+    setEditValue(value);
+  };
+
+  const handleEditSubmit = () => {
+    setSettings(prev => ({
+      ...prev,
+      [activeTab]: editValue * 60
+    }));
+    setIsEditing(false);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleEditSubmit();
+    }
+  };
+
   return (
     <div className="container">
       <div className="timer-box">
         <h1>Pomodoro Timer</h1>
+        
+        <div className="tabs">
+          <button 
+            className={`tab ${activeTab === 'sprint' ? 'active' : ''}`}
+            onClick={() => setActiveTab('sprint')}
+          >
+            Sprint
+          </button>
+          <button 
+            className={`tab ${activeTab === 'shortBreak' ? 'active' : ''}`}
+            onClick={() => setActiveTab('shortBreak')}
+          >
+            Pausa Curta
+          </button>
+          <button 
+            className={`tab ${activeTab === 'longBreak' ? 'active' : ''}`}
+            onClick={() => setActiveTab('longBreak')}
+          >
+            Pausa Longa
+          </button>
+        </div>
+
         <h2 className="phase-display">
           {PHASES[phase].name} ({sprintCount + 1}/{settings.sprintsPerCycle})
         </h2>
 
-        <h2 className="time-display">
-          {String(timeLeft).padStart(2, "0")}s
-        </h2>
+        <div 
+          className={`time-display ${phase}`}
+          onClick={handleTimerClick}
+        >
+          {isEditing ? (
+            <input
+              type="number"
+              value={editValue}
+              onChange={handleEditChange}
+              onBlur={handleEditSubmit}
+              onKeyPress={handleKeyPress}
+              autoFocus
+              min="1"
+              max="60"
+            />
+          ) : (
+            formatTime(timeLeft)
+          )}
+        </div>
 
         <div className="button-group">
           <button className="start-button" onClick={handleStart}>
@@ -140,21 +214,21 @@ function handleCycleComplete() {
           </button>
         </div>
 
-        <div className="settings">
-          {Object.entries(settings).map(([key, value]) => (
-            <label key={key}>
-              {formatLabel(key)}:
-              <input
-                type="number"
-                value={value}
-                onChange={(e) => setSettings(prev => ({
-                  ...prev,
-                  [key]: Number(e.target.value)
-                }))}
-                disabled={phase !== 'idle'}
-              />
-            </label>
-          ))}
+        <div className="sprints-input">
+          <label>
+            Sprints por Ciclo:
+            <input
+              type="number"
+              value={settings.sprintsPerCycle}
+              onChange={(e) => setSettings(prev => ({
+                ...prev,
+                sprintsPerCycle: Math.max(1, Math.min(10, Number(e.target.value)))
+              }))}
+              disabled={phase !== 'idle'}
+              min="1"
+              max="10"
+            />
+          </label>
         </div>
 
         <div className="category-input">
@@ -174,9 +248,9 @@ function handleCycleComplete() {
 // Helper para formatar labels
 const formatLabel = (key) => {
   const labels = {
-    sprint: "Duração do Sprint (segundos)",
-    shortBreak: "Pausa Curta (segundos)",
-    longBreak: "Pausa Longa (segundos)",
+    sprint: "Duração do Sprint (minutos)",
+    shortBreak: "Pausa Curta (minutos)",
+    longBreak: "Pausa Longa (minutos)",
     sprintsPerCycle: "Sprints por Ciclo"
   };
   return labels[key] || key;

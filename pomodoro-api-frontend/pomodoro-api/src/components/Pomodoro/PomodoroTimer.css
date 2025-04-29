@@ -1,69 +1,185 @@
 /* PomodoroTimer.css */
 .container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #282c34;
-    color: white;
-    font-family: Arial, sans-serif;
-  }
-  
-  .timer-box {
-    background: #444;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  }
-  
-  .time-display {
-    font-size: 2em;
-    margin: 10px 0;
-  }
-  
-  .button-group {
-    margin-top: 15px;
-  }
-  
-  .button-group button {
-    margin: 5px;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: 0.3s ease;
-  }
-  
-  .start-button { background: #4CAF50; color: white; }
-  .start-button:hover { background: #45a049; }
-  
-  .pause-button { background: #FFC107; color: black; }
-  .pause-button:hover { background: #e0a800; }
-  
-  .reset-button { background: #F44336; color: white; }
-  .reset-button:hover { background: #d32f2f; }
-  
-  .settings {
-    margin-top: 15px;
-  }
-  
-  .settings label {
-    display: block;
-    margin: 5px 0;
-  }
-  
-  .settings input {
-    margin-left: 10px;
-    padding: 5px;
-    border: none;
-    border-radius: 5px;
-    width: 50px;
-    text-align: center;
-  }
-  
-  /* PomodoroTimer.css */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #282c34;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.timer-box {
+  background: #444;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+  width: 400px;
+}
+
+.tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #666;
+  padding-bottom: 10px;
+}
+
+.tab {
+  background: none;
+  border: none;
+  color: #aaa;
+  padding: 8px 15px;
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: all 0.3s ease;
+  border-radius: 5px;
+}
+
+.tab:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tab.active {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+}
+
+.phase-display {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.time-display {
+  font-size: 4rem;
+  margin: 1.5rem 0;
+  font-family: monospace;
+  cursor: pointer;
+  padding: 20px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.time-display:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.time-display input {
+  font-size: 4rem;
+  width: 100px;
+  text-align: center;
+  background: none;
+  border: none;
+  color: white;
+  font-family: monospace;
+  border-bottom: 2px solid white;
+}
+
+.time-display.sprint {
+  color: #ff6b6b;
+}
+
+.time-display.short_break {
+  color: #4ecdc4;
+}
+
+.time-display.long_break {
+  color: #45b7d1;
+}
+
+.button-group {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.button-group button {
+  margin: 5px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+.start-button { 
+  background: #4CAF50; 
+  color: white; 
+}
+.start-button:hover { 
+  background: #45a049; 
+  transform: translateY(-2px);
+}
+
+.pause-button { 
+  background: #FFC107; 
+  color: black; 
+}
+.pause-button:hover { 
+  background: #e0a800;
+  transform: translateY(-2px);
+}
+
+.reset-button { 
+  background: #F44336; 
+  color: white; 
+}
+.reset-button:hover { 
+  background: #d32f2f;
+  transform: translateY(-2px);
+}
+
+.sprints-input {
+  margin-top: 20px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+}
+
+.sprints-input label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.sprints-input input {
+  width: 50px;
+  padding: 5px;
+  border: none;
+  border-radius: 5px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.category-input {
+  margin-top: 15px;
+}
+
+.category-input input {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  text-align: center;
+}
+
+.category-input input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* PomodoroTimer.css */
 .phase-display {
   color: #2c3e50;
   margin-bottom: 1rem;
