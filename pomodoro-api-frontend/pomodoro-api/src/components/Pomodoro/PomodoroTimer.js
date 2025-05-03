@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import usePomodoroTimer from "../../hooks/usePomodoroTimer";
 import axios from 'axios';
 import "./PomodoroTimer.css";
+import tickingSound from '../../assets/clock-ticking.mp3';
+import alarmSound from '../../assets/clock-alarm.mp3';
 
 const PHASES = {
   idle: { name: 'Pronto para começar', duration: null },
@@ -28,6 +30,19 @@ const PomodoroTimer = ({ currentUser }) => {
   const [activeTab, setActiveTab] = useState('sprint');
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
+  const [isPaused, setIsPaused] = useState(true);
+  const [hasStarted, setHasStarted] = useState(false);
+
+
+  const tickingAudio = useRef(new Audio(tickingSound));
+  const alarmAudio = useRef(new Audio(alarmSound));
+
+  // Atualiza a aba ativa quando a fase muda
+  useEffect(() => {
+    if (phase === 'sprint') setActiveTab('sprint');
+    else if (phase === 'short_break') setActiveTab('shortBreak');
+    else if (phase === 'long_break') setActiveTab('longBreak');
+  }, [phase]);
 
   // Calcula a duração atual baseada na fase
   const getPhaseDuration = () => {
@@ -53,33 +68,59 @@ const PomodoroTimer = ({ currentUser }) => {
     }
   }, [phase]); // Executa sempre que a fase muda
 
-function handleCycleComplete() {
+  // Efeito para tocar o alarme quando o tempo acabar
+  useEffect(() => {
+    if (timeLeft === 0 && phase !== 'idle' && !isPaused && hasStarted) {
+      alarmAudio.current.play().catch(error => console.log('Erro ao reproduzir alarme:', error));
+    }
+  }, [timeLeft, phase, isPaused, hasStarted]);
 
-  switch(phase) {
-    case 'sprint':
-      if(sprintCount < settings.sprintsPerCycle - 1) {
-        setPhase('short_break');
-      } else {
-        setPhase('long_break');
+  // Efeito para controlar o som do tique-taque
+  useEffect(() => {
+    if (phase !== 'idle' && !isPaused) {
+      tickingAudio.current.loop = true;
+      tickingAudio.current.play().catch(error => console.log('Erro ao reproduzir som:', error));
+      setHasStarted(true);
+    } else {
+      tickingAudio.current.pause();
+      tickingAudio.current.currentTime = 0;
+      if (phase === 'idle') {
+        setHasStarted(false);
       }
-      break;
+    }
 
-    case 'short_break':
-      setSprintCount(prev => {
-        const newCount = prev + 1;
-        return newCount;
-      });
-      setPhase('sprint');   
-      break;
+    return () => {
+      tickingAudio.current.pause();
+      tickingAudio.current.currentTime = 0;
+    };
+  }, [phase, isPaused]);
 
-    case 'long_break':
-      completePomodoro();
-      setPhase('idle');
-      setSprintCount(0);
-      break;
-  }
+  function handleCycleComplete() {
+    switch(phase) {
+      case 'sprint':
+        if(sprintCount < settings.sprintsPerCycle - 1) {
+          setPhase('short_break');
+        } else {
+          setPhase('long_break');
+        }
+        break;
 
-} 
+      case 'short_break':
+        setSprintCount(prev => {
+          const newCount = prev + 1;
+          return newCount;
+        });
+        setPhase('sprint');   
+        break;
+
+      case 'long_break':
+        completePomodoro();
+        setPhase('idle');
+        setSprintCount(0);
+        setHasStarted(false);
+        break;
+    }
+  } 
 
   const createPomodoro = async () => {
     try {
@@ -109,13 +150,22 @@ function handleCycleComplete() {
       createPomodoro();
       setPhase('sprint');
       setSprintCount(0);
+      setIsPaused(false);
+      start();
+    } else if (isPaused) {
+      setIsPaused(false);
+      start();
+    } else {
+      setIsPaused(true);
+      pause();
     }
-    start();
   };
 
   const handleReset = () => {
     setPhase('idle');
     setSprintCount(0);
+    setIsPaused(true);
+    setHasStarted(false);
     reset(settings.sprint);
   };
 
@@ -160,27 +210,50 @@ function handleCycleComplete() {
         <div className="tabs">
           <button 
             className={`tab ${activeTab === 'sprint' ? 'active' : ''}`}
-            onClick={() => setActiveTab('sprint')}
+            onClick={() => phase === 'idle' && setActiveTab('sprint')}
+            data-phase="sprint"
+            disabled={phase !== 'idle'}
           >
             Sprint
           </button>
           <button 
             className={`tab ${activeTab === 'shortBreak' ? 'active' : ''}`}
-            onClick={() => setActiveTab('shortBreak')}
+            onClick={() => phase === 'idle' && setActiveTab('shortBreak')}
+            data-phase="short_break"
+            disabled={phase !== 'idle'}
           >
             Pausa Curta
           </button>
           <button 
             className={`tab ${activeTab === 'longBreak' ? 'active' : ''}`}
-            onClick={() => setActiveTab('longBreak')}
+            onClick={() => phase === 'idle' && setActiveTab('longBreak')}
+            data-phase="long_break"
+            disabled={phase !== 'idle'}
           >
             Pausa Longa
           </button>
         </div>
 
-        <h2 className="phase-display">
-          {PHASES[phase].name} ({sprintCount + 1}/{settings.sprintsPerCycle})
-        </h2>
+        <div className="sprints-input">
+          <h2 className="phase-display">
+            {PHASES[phase].name} ({sprintCount + 1}/
+            {phase === 'idle' ? (
+              <input
+                type="number"
+                value={settings.sprintsPerCycle}
+                onChange={(e) => setSettings(prev => ({
+                  ...prev,
+                  sprintsPerCycle: Math.max(1, Math.min(10, Number(e.target.value)))
+                }))}
+                min="1"
+                max="10"
+                className="sprints-input"
+              />
+            ) : (
+              settings.sprintsPerCycle
+            )})
+          </h2>
+        </div>
 
         <div 
           className={`time-display ${phase}`}
@@ -192,7 +265,7 @@ function handleCycleComplete() {
               value={editValue}
               onChange={handleEditChange}
               onBlur={handleEditSubmit}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress}
               autoFocus
               min="1"
               max="60"
@@ -203,32 +276,12 @@ function handleCycleComplete() {
         </div>
 
         <div className="button-group">
-          <button className="start-button" onClick={handleStart}>
-            {phase === 'idle' ? 'Iniciar Ciclo' : 'Continuar'}
-          </button>
-          <button className="pause-button" onClick={pause}>
-            Pausar
+          <button className="control-button" onClick={handleStart}>
+            {phase === 'idle' ? 'Iniciar Ciclo' : (isPaused ? 'Continuar' : 'Pausar')}
           </button>
           <button className="reset-button" onClick={handleReset}>
             Reiniciar
           </button>
-        </div>
-
-        <div className="sprints-input">
-          <label>
-            Sprints por Ciclo:
-            <input
-              type="number"
-              value={settings.sprintsPerCycle}
-              onChange={(e) => setSettings(prev => ({
-                ...prev,
-                sprintsPerCycle: Math.max(1, Math.min(10, Number(e.target.value)))
-              }))}
-              disabled={phase !== 'idle'}
-              min="1"
-              max="10"
-            />
-          </label>
         </div>
 
         <div className="category-input">
