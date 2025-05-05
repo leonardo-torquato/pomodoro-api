@@ -24,15 +24,15 @@ const PomodoroTimer = ({ currentUser }) => {
 
   // Estado do ciclo
   const [phase, setPhase] = useState('idle');
-  const [sprintCount, setSprintCount] = useState(0);
   const [category, setCategory] = useState('');
-  const [pomodoroId, setPomodoroId] = useState(null);
-  const [activeTab, setActiveTab] = useState('sprint');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState('');
   const [isPaused, setIsPaused] = useState(true);
+  const [activeTab, setActiveTab] = useState('sprint');
+  const [editValue, setEditValue] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-
+  const [pomodoroId, setPomodoroId] = useState(null);
+  const [sprintCount, setSprintCount] = useState(0);
+  
 
   const tickingAudio = useRef(new Audio(tickingSound));
   const alarmAudio = useRef(new Audio(alarmSound));
@@ -43,6 +43,16 @@ const PomodoroTimer = ({ currentUser }) => {
     else if (phase === 'short_break') setActiveTab('shortBreak');
     else if (phase === 'long_break') setActiveTab('longBreak');
   }, [phase]);
+
+  // Atualiza o tempo quando a aba muda em estado idle
+  useEffect(() => {
+    if (phase === 'idle') {
+      const duration = activeTab === 'sprint' ? settings.sprint :
+                      activeTab === 'shortBreak' ? settings.shortBreak :
+                      settings.longBreak;
+      reset(duration);
+    }
+  }, [activeTab, phase]);
 
   // Calcula a duração atual baseada na fase
   const getPhaseDuration = () => {
@@ -56,15 +66,17 @@ const PomodoroTimer = ({ currentUser }) => {
 
   // Hook do timer
   const { timeLeft, start, pause, reset } = usePomodoroTimer(
-    getPhaseDuration(),
+    phase === 'idle' ? settings.sprint : getPhaseDuration(),
     handleCycleComplete
   );
 
   // Efeito para reiniciar e iniciar o timer quando a fase mudar
   useEffect(() => {
-    if (phase !== 'idle' && timeLeft !== getPhaseDuration()) {
+    if (phase !== 'idle') {
       reset(getPhaseDuration());
       start(); // Inicia automaticamente o novo timer
+    } else {
+      reset(settings.sprint); // Reseta para o tempo de sprint quando em idle
     }
   }, [phase]); // Executa sempre que a fase muda
 
@@ -179,7 +191,7 @@ const PomodoroTimer = ({ currentUser }) => {
   const handleTimerClick = () => {
     if (phase === 'idle') {
       setIsEditing(true);
-      setEditValue(settings[activeTab] / 60);
+      setEditValue(Math.floor(settings[activeTab] / 60));
     }
   };
 
@@ -260,16 +272,20 @@ const PomodoroTimer = ({ currentUser }) => {
           onClick={handleTimerClick}
         >
           {isEditing ? (
-            <input
-              type="number"
-              value={editValue}
-              onChange={handleEditChange}
-              onBlur={handleEditSubmit}
-              onKeyDown={handleKeyPress}
-              autoFocus
-              min="1"
-              max="60"
-            />
+            <div className="time-edit-container">
+              <input
+                type="number"
+                value={editValue}
+                onChange={handleEditChange}
+                onBlur={handleEditSubmit}
+                onKeyDown={handleKeyPress}
+                autoFocus
+                min="1"
+                max="60"
+                className="time-edit-input"
+              />
+              <span className="time-edit-suffix">:00</span>
+            </div>
           ) : (
             formatTime(timeLeft)
           )}
@@ -296,17 +312,6 @@ const PomodoroTimer = ({ currentUser }) => {
       </div>
     </div>
   );
-};
-
-// Helper para formatar labels
-const formatLabel = (key) => {
-  const labels = {
-    sprint: "Duração do Sprint (minutos)",
-    shortBreak: "Pausa Curta (minutos)",
-    longBreak: "Pausa Longa (minutos)",
-    sprintsPerCycle: "Sprints por Ciclo"
-  };
-  return labels[key] || key;
 };
 
 export default PomodoroTimer;
