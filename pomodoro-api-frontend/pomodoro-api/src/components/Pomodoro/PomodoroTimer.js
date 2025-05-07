@@ -16,9 +16,9 @@ const PomodoroTimer = ({ currentUser }) => {
 
   // valores padrão do Pomodoro para place holder na aplicação.
   const [settings, setSettings] = useState({
-    sprint: 25 * 60, // Convertendo minutos para segundos
-    shortBreak: 5 * 60, // Convertendo minutos para segundos
-    longBreak: 15 * 60, // Convertendo minutos para segundos
+    sprint: 25, // Convertendo minutos para segundos
+    shortBreak: 5, // Convertendo minutos para segundos
+    longBreak: 15, // Convertendo minutos para segundos
     sprintsPerCycle: 3
   });
 
@@ -62,6 +62,18 @@ const PomodoroTimer = ({ currentUser }) => {
       case 'long_break': return settings.longBreak;
       default: return 0;
     }
+  };
+
+  const getTimePercentClass = () => {
+    if (phase === 'idle') return '';
+    
+    const totalTime = getPhaseDuration();
+    const elapsedPercent = ((totalTime - timeLeft) / totalTime) * 100;
+    
+    if (elapsedPercent >= 99) return 'danger';
+    if (elapsedPercent >= 66) return 'caution';
+    if (elapsedPercent >= 33) return 'warning';
+    return 'start';
   };
 
   // Hook do timer
@@ -185,7 +197,12 @@ const PomodoroTimer = ({ currentUser }) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
 
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    return (
+      <>
+        <span className="minutes">{String(mins).padStart(2, '0')}</span>
+        :{String(secs).padStart(2, '0')}
+      </>
+    );
   };
 
   const handleTimerClick = () => {
@@ -223,6 +240,51 @@ const PomodoroTimer = ({ currentUser }) => {
     }
   };
 
+  // Helper to interpolate between two colors
+  function interpolateColor(color1, color2, factor) {
+    const result = color1.slice();
+    for (let i = 0; i < 3; i++) {
+      result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
+    }
+    return result;
+  }
+
+  // Convert hex to rgb array
+  function hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) {
+      hex = hex.split('').map(x => x + x).join('');
+    }
+    const num = parseInt(hex, 16);
+    return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+  }
+
+  // Get timer color based on elapsed percent (0-100)
+  function getTimerColor() {
+    if (phase === 'idle') return '#fff';
+    const totalTime = getPhaseDuration();
+    const elapsedPercent = ((totalTime - timeLeft) / totalTime) * 100;
+    // Color stops
+    const stops = [
+      { pct: 0, color: hexToRgb('#4CAF50') },    // green
+      { pct: 33, color: hexToRgb('#FFC107') },   // yellow
+      { pct: 66, color: hexToRgb('#FF9800') },   // orange
+      { pct: 99, color: hexToRgb('#F44336') }    // red
+    ];
+    let lower = stops[0], upper = stops[stops.length - 1];
+    for (let i = 1; i < stops.length; i++) {
+      if (elapsedPercent < stops[i].pct) {
+        lower = stops[i - 1];
+        upper = stops[i];
+        break;
+      }
+    }
+    const range = upper.pct - lower.pct;
+    const rangePct = range === 0 ? 0 : (elapsedPercent - lower.pct) / range;
+    const rgb = interpolateColor(lower.color, upper.color, rangePct);
+    return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+  }
+
   return (
     <div className="container">
       <div className="timer-box">
@@ -255,30 +317,20 @@ const PomodoroTimer = ({ currentUser }) => {
           </button>
         </div>
 
-        <div className="sprints-input">
-          <h2 className="phase-display">
-            {PHASES[phase].name} ({sprintCount + 1}/
-            {phase === 'idle' ? (
-              <input
-                type="number"
-                value={settings.sprintsPerCycle}
-                onChange={(e) => setSettings(prev => ({
-                  ...prev,
-                  sprintsPerCycle: Math.max(1, Math.min(10, Number(e.target.value)))
-                }))}
-                min="1"
-                max="10"
-                className="sprints-input"
-              />
-            ) : (
-              settings.sprintsPerCycle
-            )})
-          </h2>
+        <div className="category-input">
+          <input
+            type="text"
+            placeholder="Categoria (opcional)"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            disabled={!currentUser || phase !== 'idle'}
+          />
         </div>
 
         <div 
           className={`time-display ${phase}`}
           onClick={handleTimerClick}
+          style={{ color: getTimerColor() }}
         >
           {isEditing ? (
             <div className="time-edit-container">
@@ -300,23 +352,47 @@ const PomodoroTimer = ({ currentUser }) => {
           )}
         </div>
 
-        <div className="button-group">
-          <button className="control-button" onClick={handleStart}>
-            {phase === 'idle' ? 'Iniciar Ciclo' : (isPaused ? 'Continuar' : 'Pausar')}
-          </button>
-          <button className="reset-button" onClick={handleReset}>
-            Reiniciar
-          </button>
+        <div className="sprints-input">
+          <h2 className="phase-display">
+            <div className="sprint-counter">
+              <span>(</span>
+              {sprintCount + 1}   
+              <span>/</span>
+              {phase === 'idle' ? (
+                <input
+                  type="number"
+                  value={settings.sprintsPerCycle}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    sprintsPerCycle: Math.max(1, Math.min(10, Number(e.target.value)))
+                  }))}
+                  min="1"
+                  max="10"
+                  className="sprints-input"
+                />
+              ) : (
+                settings.sprintsPerCycle
+              )}
+              <span>)</span>
+            </div>
+          </h2>
         </div>
 
-        <div className="category-input">
-          <input
-            type="text"
-            placeholder="Categoria (opcional)"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            disabled={!currentUser || phase !== 'idle'}
-          />
+        <div className="button-group">
+          {phase === 'idle' ? (
+            <button className="control-button button-enter" onClick={handleStart}>
+              Iniciar Ciclo
+            </button>
+          ) : (
+            <>
+              <button className="control-button button-enter" onClick={handleStart}>
+                {isPaused ? 'Continuar' : 'Pausar'}
+              </button>
+              <button className="reset-button button-enter" onClick={handleReset}>
+                Reiniciar
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

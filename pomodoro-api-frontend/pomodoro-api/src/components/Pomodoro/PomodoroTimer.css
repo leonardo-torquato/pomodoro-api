@@ -1,23 +1,45 @@
-/* PomodoroTimer.css */
+/* PomodoroTimer.css - Simplified & Refactored */
+:root {
+  --color-bg: #282c34;
+  --color-timer-bg: #444;
+  --color-white: #fff;
+  --color-white-70: rgba(255,255,255,0.7);
+  --color-white-50: rgba(255,255,255,0.5);
+  --color-white-20: rgba(255,255,255,0.2);
+  --color-white-10: rgba(255,255,255,0.1);
+  --color-white-05: rgba(255,255,255,0.05);
+  --color-green: #4CAF50;
+  --color-yellow: #FFC107;
+  --color-orange: #FF9800;
+  --color-red: #F44336;
+  --transition-main: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-color: color 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Layout */
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #282c34;
-  color: white;
+  background: var(--color-bg);
+  color: var(--color-white);
   font-family: Arial, sans-serif;
 }
 
 .timer-box {
-  background: #444;
+  background: var(--color-timer-bg);
   padding: 30px;
   border-radius: 15px;
   text-align: center;
-  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
+/* Tabs */
 .tabs {
   display: flex;
   justify-content: space-between;
@@ -25,7 +47,6 @@
   border-bottom: 2px solid #666;
   padding-bottom: 10px;
 }
-
 .tab {
   background: none;
   border: none;
@@ -33,254 +54,211 @@
   padding: 8px 15px;
   cursor: pointer;
   font-size: 1.1em;
-  transition: all 0.3s ease;
   border-radius: 5px;
   opacity: 0.7;
+  transition: var(--transition-main);
 }
-
 .tab:not(:disabled):hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
+  background: var(--color-white-10);
   opacity: 0.9;
 }
-
 .tab.active {
-  color: white;
-  background: rgba(255, 255, 255, 0.2);
+  color: var(--color-white);
+  background: var(--color-white-20);
   font-weight: bold;
   opacity: 1;
   transform: translateY(-2px);
 }
 
-/* Cores específicas para cada fase */
-.tab[data-phase="sprint"].active {
-  background: rgba(255, 107, 107, 0.2);
-  color: #ff6b6b;
-}
-
-.tab[data-phase="short_break"].active {
-  background: rgba(78, 205, 196, 0.2);
-  color: #4ecdc4;
-}
-
-.tab[data-phase="long_break"].active {
-  background: rgba(69, 183, 209, 0.2);
-  color: #45b7d1;
-}
-
-
-
+/* Timer Display */
 .time-display {
-  font-size: 4rem;
-  margin: 1.5rem 0;
+  font-size: 5.5rem;
+  margin: 1.5rem 0 0.5rem 0;
   font-family: monospace;
   cursor: pointer;
   padding: 20px;
   border-radius: 10px;
-  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--color-white);
+  transition: var(--transition-color);
+}
+.time-display[data-time-percent="start"] { color: var(--color-green); }
+.time-display[data-time-percent="warning"] { color: var(--color-yellow); }
+.time-display[data-time-percent="caution"] { color: var(--color-orange); }
+.time-display[data-time-percent="danger"] { color: var(--color-red); }
+.time-display .minutes {
+  background: var(--color-white-10);
+  padding: 0 10px;
+  border-radius: 8px;
+  transition: var(--transition-main);
+}
+.time-display:hover .minutes {
+  background: var(--color-white-20);
 }
 
-.time-display:hover {
-  background: rgba(255, 255, 255, 0.1);
+/* Timer Edit Input */
+.time-edit-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.time-edit-input {
+  width: 80px;
+  font-size: 5.5rem;
+  padding: 0 10px;
+  margin: 0;
+  border-radius: 8px;
+}
+.time-edit-input:focus {
+  outline: none;
+  background: var(--color-white-15, rgba(255,255,255,0.15));
+}
+.time-edit-suffix {
+  font-size: 5.5rem;
+  margin-left: 2px;
 }
 
-.time-display input {
-  font-size: 4rem;
-  width: 100px;
-  text-align: center;
-  background: none;
-  border: none;
-  color: white;
-  font-family: monospace;
-  border-bottom: 2px solid white;
-}
-
-.time-display.sprint {
-  color: #ff6b6b;
-}
-
-.time-display.short_break {
-  color: #4ecdc4;
-}
-
-.time-display.long_break {
-  color: #45b7d1;
-}
-
+/* Button Group */
 .button-group {
   margin-top: 20px;
   display: flex;
   justify-content: center;
   gap: 10px;
+  width: 100%;
+  padding: 0;
+  position: relative;
+  min-height: 48px;
 }
-
 .button-group button {
-  margin: 5px;
-  padding: 12px 20px;
+  padding: 12px 24px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-size: 1em;
-  transition: all 0.3s ease;
   font-weight: bold;
-}
-
-.start-button { 
-  background: #4CAF50; 
-  color: white; 
-}
-.start-button:hover { 
-  background: #45a049; 
-  transform: translateY(-2px);
-}
-
-.pause-button { 
-  background: #FFC107; 
-  color: black; 
-}
-.pause-button:hover { 
-  background: #e0a800;
-  transform: translateY(-2px);
-}
-
-.reset-button { 
-  background: #F44336; 
-  color: white; 
-}
-.reset-button:hover { 
-  background: #d32f2f;
-  transform: translateY(-2px);
-}
-
-.sprints-input {
-  margin-top: 20px;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
-}
-
-.sprints-input label {
-  display: box;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.sprints-input input {
-  width: 50px;
-  padding: 5px;
-  border: none;
-  border-radius: 5px;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-}
-
-.category-input {
-  margin-top: 15px;
-}
-
-.category-input input {
+  flex: 1;
   width: 100%;
-  padding: 8px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: var(--transition-main);
+}
+.button-enter {
+  animation: buttonAppear 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes buttonAppear {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.button-group button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+.button-group button:active {
+  transform: translateY(0);
+}
+.control-button { background: var(--color-green); color: var(--color-white); }
+.reset-button { background: var(--color-red); color: var(--color-white); }
+.control-button:disabled, .reset-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Category Input */
+.category-input {
+  margin: 1rem 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.category-input input {
+  width: 33.33%;
+  min-width: 160px;
+  max-width: 200px;
+  padding: 8px 12px;
   border: none;
   border-radius: 5px;
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: var(--color-white-05);
+  color: var(--color-white);
   text-align: center;
+  font-size: 1rem;
+  transition: var(--transition-main);
 }
-
+.category-input input:focus {
+  outline: none;
+  background: var(--color-white-10);
+}
 .category-input input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-white-50);
 }
 
-/* PomodoroTimer.css */
+/* Sprints Counter */
+.sprints-input {
+  margin-top: 0.5rem;
+  padding: 5px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+}
 .phase-display {
-  color: #fff;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
+  color: var(--color-white-70);
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
+  font-family: monospace;
 }
-
 .phase-display .sprints-input {
-  width: 40px;
-  background: rgba(255, 255, 255, 0.05);
-  border: none;
-  border-radius: 4px;
-  color: white;
-  font-size: 1.5rem;
-  text-align: center;
+  width: 30px;
+  font-size: 1.1rem;
   padding: 2px;
-  font-family: inherit;
-  vertical-align: middle;
-  margin-top: -2px;
-}
-
-.phase-display .sprints-input:focus {
-  outline: none;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.phase-display .sprints-input::-webkit-inner-spin-button,
-.phase-display .sprints-input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
   margin: 0;
+  vertical-align: middle;
 }
-
-.phase-display .sprints-input[type=number] {
-  appearance: textfield;
+.phase-display .sprints-input:hover {
+  background: var(--color-white-10);
 }
-
-/* Adicione classes para diferentes fases */
-.sprint-phase {
-  background-color: rgba(231, 76, 60, 0.1);
-}
-
-.short-break-phase {
-  background-color: rgba(46, 204, 113, 0.1);
-}
-
-.long-break-phase {
-  background-color: rgba(52, 152, 219, 0.1);
-}
-
-.time-edit-container {
+.phase-display .sprint-counter {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.time-edit-input {
-  width: 50px;
-  text-align: right;
-  font-size: 2.5rem;
+.phase-display .sprint-counter span {
+  opacity: 0.7;
+}
+
+/* Numeric Inputs (shared) */
+input[type="number"] {
+  background: var(--color-white-05);
   border: none;
-  background: transparent;
-  color: inherit;
-  padding: 0;
-  margin: 0;
+  border-radius: 4px;
+  color: var(--color-white);
+  text-align: center;
+  font-family: monospace;
+  transition: var(--transition-main);
+  cursor: pointer;
   appearance: textfield;
-  -moz-appearance: textfield;
 }
-
-.time-edit-input::-webkit-outer-spin-button,
-.time-edit-input::-webkit-inner-spin-button {
+input[type="number"]:hover {
+  background: var(--color-white-10);
+}
+input[type="number"]:focus {
+  outline: none;
+  background: var(--color-white-15, rgba(255,255,255,0.15));
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
-}
-
-/* Adiciona estilo para quando o input está em foco */
-.time-edit-input:focus {
-  outline: none;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  padding: 0 4px;
-}
-
-.time-edit-suffix {
-  font-size: 2.5rem;
-  margin-left: 2px;
 }
