@@ -196,21 +196,30 @@ const PomodoroTimer = ({ currentUser }) => {
   };
 
   const handleEditChange = (e) => {
-    const value = Math.max(1, Math.min(60, Number(e.target.value)));
+    const value = e.target.value === '' ? '' : Math.max(1, Math.min(60, Number(e.target.value)));
     setEditValue(value);
   };
 
   const handleEditSubmit = () => {
+    if (editValue === '') {
+      setEditValue(Math.floor(settings[activeTab] / 60));
+      return;
+    }
+    const newDuration = editValue * 60;
     setSettings(prev => ({
       ...prev,
-      [activeTab]: editValue * 60
+      [activeTab]: newDuration
     }));
+    reset(newDuration);
     setIsEditing(false);
   };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleEditSubmit();
+    } else if (e.key === 'Escape') {
+      setIsEditing(false);
+      setEditValue(Math.floor(settings[activeTab] / 60));
     }
   };
 

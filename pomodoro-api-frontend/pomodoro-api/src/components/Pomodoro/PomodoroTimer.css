@@ -263,12 +263,21 @@
   padding: 0;
   margin: 0;
   appearance: textfield;
+  -moz-appearance: textfield;
 }
 
 .time-edit-input::-webkit-outer-spin-button,
 .time-edit-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* Adiciona estilo para quando o input está em foco */
+.time-edit-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 0 4px;
 }
 
 .time-edit-suffix {
